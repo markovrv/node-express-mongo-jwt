@@ -8,12 +8,12 @@ verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
   if (!token) {
-    return res.status(403).send({ message: "No token provided!" });
+    return res.status(403).send({ message: "Ошибка! Требуется токен!" });
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: "Unauthorized!" });
+      return res.status(401).send({ message: "Ошибка! Не авторизован!" });
     }
     req.userId = decoded.id;
     next();
@@ -44,7 +44,7 @@ isAdmin = (req, res, next) => {
           }
         }
 
-        res.status(403).send({ message: "Require Admin Role!" });
+        res.status(403).send({ message: "Ошибка! Требуется роль администратора!" });
         return;
       }
     );
@@ -75,7 +75,7 @@ isModerator = (req, res, next) => {
           }
         }
 
-        res.status(403).send({ message: "Require Moderator Role!" });
+        res.status(403).send({ message: "Ошибка! Требуется роль модератора!" });
         return;
       }
     );
