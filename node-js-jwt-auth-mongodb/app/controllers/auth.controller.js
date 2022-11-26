@@ -61,7 +61,7 @@ exports.signup = (req, res) => {
   });
 };
 
-exports.signin = (req, res) => {
+exports.signin = async (req, res) => {
   User.findOne({
     username: req.body.username
   })
@@ -76,7 +76,10 @@ exports.signin = (req, res) => {
         return res.status(404).send({ message: "Ошибка! Пользователь не найден!" });
       }
 
-      var passwordIsValid = bcrypt.compareSync( req.body.password, user.password );
+      let passwordIsValid = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
 
       if (!passwordIsValid) {
         return res.status(401).send({
@@ -85,25 +88,26 @@ exports.signin = (req, res) => {
         });
       }
 
-      var token = jwt.sign({ id: user.id }, config.secret, {
+      let token = jwt.sign({ id: user.id }, config.secret, {
         expiresIn: config.jwtExpiration
       });
 
-      let refreshToken = await RefreshToken.createToken(user);
-
-      var authorities = [];
-
-      for (let i = 0; i < user.roles.length; i++) {
-        authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
-      }
-      res.status(200).send({
-        id: user._id,
-        username: user.username,
-        email: user.email,
-        roles: authorities,
-        accessToken: token,
-        refreshToken: refreshToken,
-      });
+      RefreshToken
+        .createToken(user)
+        .then(refreshToken => {
+          var authorities = [];
+          for (let i = 0; i < user.roles.length; i++) {
+            authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
+          }
+          res.status(200).send({
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            roles: authorities,
+            accessToken: token,
+            refreshToken: refreshToken,
+          });
+        });
     });
 };
 
