@@ -1,8 +1,14 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
+const { TokenExpiredError } = jwt;
 const User = db.user;
 const Role = db.role;
+
+const catchError = (err, res) => {
+  if (err instanceof TokenExpiredError) return res.status(401).send({ message: "Unauthorized! Access Token was expired!" });
+  return res.sendStatus(401).send({ message: "Unauthorized!" });
+}
 
 verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
@@ -12,9 +18,7 @@ verifyToken = (req, res, next) => {
   }
 
   jwt.verify(token, config.secret, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ message: "Ошибка! Не авторизован!" });
-    }
+    if (err) return catchError(err, res);
     req.userId = decoded.id;
     next();
   });
@@ -82,9 +86,5 @@ isModerator = (req, res, next) => {
   });
 };
 
-const authJwt = {
-  verifyToken,
-  isAdmin,
-  isModerator
-};
+const authJwt = { verifyToken, isAdmin, isModerator };
 module.exports = authJwt;

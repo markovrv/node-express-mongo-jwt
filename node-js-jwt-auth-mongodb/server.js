@@ -5,7 +5,7 @@ const db = require("./app/models");
 const Role = db.role;
 const dbConfig = require("./app/config/db.config")
 
-const corsOptions = { origin: "http://localhost:8081" };
+const corsOptions = { origin: '*' };
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
