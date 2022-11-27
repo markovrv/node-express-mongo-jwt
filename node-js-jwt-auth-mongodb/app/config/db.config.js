@@ -1,5 +1,8 @@
 module.exports = {
-    HOST: "localhost",
-    PORT: 27017,
-    DB: "bezkoder_db"
-  };
+  url() {
+    let usr = (process.env.DB_USER && process.env.DB_PASSWORD)
+      ? `${process.env.DB_USER}:${process.env.DB_PASSWORD}@`
+      : '';
+    return `mongodb://${usr}${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}?authSource=admin`
+  }
+};
